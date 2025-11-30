@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ریاضی‌نما — عرفان حیدری | مدرسه اسرار</title>
+  <script src="https://unpkg.com/mathjs@12.4.2/lib/browser/math.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazir:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f9ff;
+      --card: #fff;
+      --text: #2c3e50;
+      --primary: #3498db;
+      --school: #9b59b6;
+      --success: #27ae60;
+      --border: #e0e5f0;
+    }
+    .dark {
+      --bg: #1e2a38;
+      --card: #2d3748;
+      --text: #e2e8f0;
+      --border: #4a5568;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Vazir', 'Segoe UI', Tahoma, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 15px;
+      transition: background 0.3s, color 0.3s;
+      line-height: 1.6;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    header {
+      text-align: center;
+      padding: 20px 0 25px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .name-tag {
+      font-size: 22px;
+      font-weight: bold;
+      color: white;
+      background: var(--primary);
+      padding: 8px 24px;
+      border-radius: 30px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .school-tag {
+      font-size: 18px;
+      color: white;
+      background: var(--school);
+      padding: 6px 20px;
+      border-radius: 24px;
+      display: inline-block;
+    }
+    h1 {
+      margin: 15px 0 10px;
+      font-size: 2rem;
+      color: var(--text);
+    }
+    .subtitle { color: #7f8c8d; font-size: 16px; }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    #in {
+      flex: 1;
+      padding: 16px;
+      font-size: 17px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--text);
+      direction: ltr;
+      text-align: left;
+    }
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 16px 24px;
+      font-size: 17px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.9; }
+    #out, #plot {
+      background: var(--card);
+      padding: 22px;
+      border-radius: 12px;
+      margin: 25px 0;
+      min-height: 70px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+      overflow: auto;
+    }
+    #plot { display: none; }
+    .step {
+      background: #e8f4fc;
+      border-right: 4px solid var(--primary);
+      padding: 14px;
+      border-radius: 8px;
+      margin: 12px 0;
+      font-size: 15px;
+    }
+    .step.success {
+      background: #e6f7ee;
+      border-right-color: var(--success);
+    }
+    .history {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .history-list {
+      margin-top: 10px;
+    }
+    .history-item {
+      padding: 8px 12px;
+      background: rgba(52, 152, 219, 0.08);
+      border-radius: 8px;
+      margin: 6px 0;
+      cursor: pointer;
+      font-family: monospace;
+    }
+    .history-item:hover {
+      background: rgba(52, 152, 219, 0.15);
+    }
+    .toggle-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 100;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px dashed var(--border);
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+    @media (max-width: 600px) {
+      .input-group { flex-direction: column; }
+      .toggle-btn { top: 10px; left: 10px; width: 40px; height: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toggle-btn" onclick="toggleTheme()">🌓</div>
+  
+  <div class="container">
+    <header>
+      <div class="name-tag">عرفان حیدری</div>
+      <div class="school-tag">مدرسه اسرار</div>
+      <h1>ریاضی‌نما 🧠</h1>
+      <p class="subtitle">حل‌گر هوشمند ریاضی — گام‌به‌گام • نمودار • تاریخچه</p>
+    </header>
+
+    <div class="input-group">
+      <input id="in" placeholder="مثال: x^2-5x+6=0 یا plot sin(x)" value="x^2 - 5x + 6 = 0">
+      <button onclick="go()">⚡ حل کن</button>
+    </div>
+
+    <div id="out">در حال بارگذاری... لطفاً صبر کنید.</div>
+    <div id="plot"></div>
+
+    <div class="history">
+      <strong>تاریخچهٔ اخیر:</strong>
+      <div class="history-list" id="history-list"></div>
+    </div>
+
+    <footer>
+      <p>پروژهٔ جشنوارهٔ خوارزمی — طراحی‌شده توسط عرفان حیدری</p>
+    </footer>
+  </div>
+
+  <script>
+    // تم
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') document.body.classList.add('dark');
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    }
+
+    // تاریخچه
+    let history = JSON.parse(localStorage.getItem('mathHistory') || '[]');
+    
+    function updateHistory() {
+      const list = document.getElementById('history-list');
+      list.innerHTML = history.slice(-5).reverse().map(q => 
+        `<div class="history-item" onclick="setInput('${q.replace(/'/g, "\\'")}')" title="اجرا">${q}</div>`
+      ).join('');
+    }
+
+    function setInput(q) {
+      document.getElementById('in').value = q;
+      go();
+    }
+
+    // تابع اصلی
+    function go() {
+      const q = document.getElementById('in').value.trim();
+      const out = document.getElementById('out');
+      const plotDiv = document.getElementById('plot');
+      out.innerHTML = 'در حال پردازش...';
+      plotDiv.style.display = 'none';
+
+      if (!q) { out.innerHTML = '❌ لطفاً یک عبارت ریاضی وارد کنید.'; return; }
+
+      // ذخیره در تاریخچه
+      if (!history.includes(q)) {
+        history.push(q);
+        if (history.length > 20) history.shift();
+        localStorage.setItem('mathHistory', JSON.stringify(history));
+        updateHistory();
+      }
+
+      try {
+        // رسم نمودار
+        if (/^plot\s/i.test(q) || /^رسم\s/i.test(q)) {
+          const expr = q.replace(/^plot\s+/i, '').replace(/^رسم\s+/i, '').trim();
+          plotFunction(expr, plotDiv);
+          out.innerHTML = `📈 نمودار تابع <code>${expr}</code> رسم شد.`;
+          plotDiv.style.display = 'block';
+          return;
+        }
+
+        // معادله
+        if (q.includes('=')) {
+          const [left, right] = q.split('=').map(s => s.trim());
+          const eqStr = `${left} - (${right})`;
+          const node = math.parse(eqStr);
+          const simplified = math.simplify(eqStr);
+          const coeffs = extractCoeffs(simplified.toString());
+          
+          if (coeffs.a !== 0) {
+            out.innerHTML = solveQuadraticStepByStep(coeffs.a, coeffs.b, coeffs.c, left, right);
+            return;
+          }
+        }
+
+        // محاسبهٔ معمولی
+        let expr = q
+          .replace(/\bint\b/g, 'integrate')
+          .replace(/\bdiff\b/g, 'derivative')
+          .replace(/\bln\b/g, 'log')
+          .replace(/(\d+)!/g, 'factorial($1)');
+        
+        const res = math.evaluate(expr);
+        out.innerHTML = `<strong>✅ پاسخ:</strong> <code>${math.format(res, {precision: 12})}</code>`;
+        
+      } catch (e) {
+        out.innerHTML = `❌ خطا: ${e.message || 'عبارت نامعتبر است. مثال: 2+3, x^2=4, plot sin(x)'}`;
+      }
+    }
+
+    // استخراج ضرایب ax²+bx+c
+    function extractCoeffs(str) {
+      let a = 0, b = 0, c = 0;
+      const terms = str.replace(/\s+/g, '').split(/(?=[+-])/).filter(t => t);
+      terms.forEach(term => {
+        if (term.includes('x^2')) {
+          const coef = term.replace('x^2', '') || '1';
+          a = parseFloat(coef.replace('+', '') || '1');
+        } else if (term.includes('x') && !term.includes('x^')) {
+          const coef = term.replace('x', '') || '1';
+          b = parseFloat(coef.replace('+', '') || '1');
+        } else if (term !== '' && !isNaN(term)) {
+          c = parseFloat(term);
+        }
+      });
+      return {a, b, c};
+    }
+
+    // حل گام‌به‌گام درجه ۲
+    function solveQuadraticStepByStep(a, b, c, left, right) {
+      const steps = [];
+      steps.push(`<div class="step">🔹 معادلهٔ ورودی: <code>${left} = ${right}</code></div>`);
+      steps.push(`<div class="step">🔹 استانداردشده: <code>${a}x² + (${b})x + (${c}) = 0</code></div>`);
+      
+      const delta = b*b - 4*a*c;
+      steps.push(`<div class="step">🔹 دلتا: Δ = b² - 4ac = (${b})² - 4×(${a})×(${c}) = <strong>${delta}</strong></div>`);
+      
+      if (delta < 0) {
+        steps.push(`<div class="step">🔹 چون Δ < 0، معادله ریشهٔ حقیقی <strong>ندارد</strong>.</div>`);
+        return steps.join('');
+      }
+      
+      const sqrtD = Math.sqrt(delta);
+      const x1 = (-b + sqrtD) / (2*a);
+      const x2 = (-b - sqrtD) / (2*a);
+      
+      steps.push(`<div class="step">🔹 ریشه‌ها: x = [-b ± √Δ] / (2a)</div>`);
+      steps.push(`<div class="step">x₁ = [${-b} + ${sqrtD.toFixed(3)}] / ${2*a} = <strong>${x1.toFixed(4)}</strong></div>`);
+      steps.push(`<div class="step">x₂ = [${-b} - ${sqrtD.toFixed(3)}] / ${2*a} = <strong>${x2.toFixed(4)}</strong></div>`);
+      steps.push(`<div class="step success">✅ <strong>نتیجه:</strong> x₁ = ${x1.toFixed(4)}، x₂ = ${x2.toFixed(4)}</div>`);
+      
+      return steps.join('');
+    }
+
+    // رسم نمودار
+    function plotFunction(expr, plotDiv) {
+      try {
+        const f = math.compile(expr);
+        const x = [];
+        const y = [];
+        for (let i = -10; i <= 10; i += 0.1) {
+          try {
+            const yi = f.evaluate({x: i});
+            if (isFinite(yi)) {
+              x.push(i);
+              y.push(yi);
+            } else {
+              x.push(i); y.push(NaN);
+            }
+          } catch {
+            x.push(i); y.push(NaN);
+          }
+        }
+
+        Plotly.newPlot(plotDiv, [{
+          x: x, y: y,
+          type: 'scatter', mode: 'lines',
+          line: { color: '#3498db', width: 3 }
+        }], {
+          title: `نمودار: ${expr}`,
+          xaxis: { title: 'x' },
+          yaxis: { title: 'y', range: [-20, 20] },
+          margin: { t: 40, b: 40, l: 40, r: 20 },
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          paper_bgcolor: 'rgba(0,0,0,0)'
+        }, { responsive: true });
+      } catch (e) {
+        plotDiv.innerHTML = `<p style="color:red">❌ خطا در رسم: ${e.message}</p>`;
+      }
+    }
+
+    // شروع
+    updateHistory();
+    setTimeout(() => {
+      try { go(); } catch {}
+    }, 300);
+  </script>
+</body>
+</html>
